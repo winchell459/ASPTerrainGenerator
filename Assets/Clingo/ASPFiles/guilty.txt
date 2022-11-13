@@ -1,0 +1,11 @@
+% instance
+motive(harry).
+motive(sally).
+guilty(harry).
+a.
+a(1).
+a(2,word).
+b.
+b(2).
+% encoding
+innocent(Suspect) :- motive(Suspect), not guilty(Suspect).
