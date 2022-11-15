@@ -435,6 +435,9 @@ namespace NoiseTerrain
         public Vector2Int minTile, maxTile;
         Chunk[,] chunks;
 
+        public List<FilledChunk> filledChunks = new List<FilledChunk>();
+        public int[,] filledChunkIDs;
+
         public RoomChunk(List<Chunk> roomChunks)
         {
             int minYID = int.MaxValue;
@@ -465,6 +468,7 @@ namespace NoiseTerrain
             //need to calc the min/max tiles
 
             PrintBoolMap();
+            PrintFilledChunkIDs();
         }
         public void PrintBoolMap()
         {
@@ -504,7 +508,66 @@ namespace NoiseTerrain
 
             return chunks[xID, yID].GetTile(x, y);
         }
+
+        public void SetFilledChunkIDs()
+        {
+            filledChunkIDs = new int[width, height];
+            List<Vector2Int> toVisit = new List<Vector2Int>();
+            List<Vector2Int> visited = new List<Vector2Int>();
+            for(int x = 0; x < width; x += 1)
+            {
+                for(int y = 0; y < height; y += 1)
+                {
+                    if(GetTile(x,y))toVisit.Add(new Vector2Int(x, y));
+                }
+            }
+            int filledChunkID = 0;
+            while(toVisit.Count > 0)
+            {
+                filledChunkID += 1;
+                List<Vector2Int> frontier = new List<Vector2Int>();
+                frontier.Add(toVisit[0]);
+                //toVisit.RemoveAt(0);
+                while (frontier.Count > 0)
+                {
+                    Vector2Int loc = frontier[0];
+                    frontier.RemoveAt(0);
+                    filledChunkIDs[loc.x, loc.y] = filledChunkID;
+                    visited.Add(loc);
+                    if (!toVisit.Remove(loc)) Debug.Log(loc + " removed");
+                    int x = loc.x, y = loc.y;
+                    if (x > 0 && GetTile(x - 1, y) && !visited.Contains(new Vector2Int(x - 1, y)) && !frontier.Contains(new Vector2Int(x - 1, y))) frontier.Add(new Vector2Int(x - 1, y));
+                    if (y > 0 && GetTile(x, y - 1) && !visited.Contains(new Vector2Int(x, y - 1)) && !frontier.Contains(new Vector2Int(x, y - 1))) frontier.Add(new Vector2Int(x, y - 1));
+                    if (x < width - 1 && GetTile(x + 1, y ) && !visited.Contains(new Vector2Int(x + 1, y)) && !frontier.Contains(new Vector2Int(x + 1, y))) frontier.Add(new Vector2Int(x + 1, y));
+                    if (y < height - 1 && GetTile(x, y + 1) && !visited.Contains(new Vector2Int(x, y + 1)) && !frontier.Contains(new Vector2Int(x, y + 1))) frontier.Add(new Vector2Int(x, y + 1));
+                }
+            }
+        }
+        public void PrintFilledChunkIDs()
+        {
+            SetFilledChunkIDs();
+            string idMap = "";
+            for(int y = 0; y < height; y += 1)
+            {
+                for(int x = 0; x < width; x += 1)
+                {
+                    if (filledChunkIDs[x, y] > 9) {
+                        idMap += (char)((int)'A' + filledChunkIDs[x, y] % 10);
+                            }
+                    else idMap += filledChunkIDs[x, y];
+                }
+                idMap += "\n";
+            }
+            Debug.Log(idMap);
+        }
     }
 
-    
+    public class FilledChunk
+    {
+        public List<Vector2Int> filledTiles;
+        public FilledChunk(List<Vector2Int> filledTiles)
+        {
+            this.filledTiles = filledTiles;
+        }
+    }
 }
