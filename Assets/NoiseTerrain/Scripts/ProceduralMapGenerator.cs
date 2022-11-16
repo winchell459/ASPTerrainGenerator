@@ -307,6 +307,7 @@ namespace NoiseTerrain
         }
 
         Vector2Int lastClickChunkID;
+        public GameObject playerPrefab;
         private void HandleMouseClickResetChunk()
         {
             if (Input.GetMouseButtonUp(0))
@@ -317,6 +318,9 @@ namespace NoiseTerrain
                     visibleChunks.Add(GetChunk(visibleChunkID));
                 }
                 RoomChunk roomChunk = new RoomChunk(visibleChunks);
+
+                Vector2 spawn = new Vector2(roomChunk.minTile.x + 0.5f, -roomChunk.minTile.y + 0.5f);
+                Instantiate(playerPrefab, spawn, Quaternion.identity);
             }
             //Vector2Int clickChunkID = GetChunkID(Camera.main.ScreenToWorldPoint(Input.mousePosition));
             //if(Input.GetMouseButton(0) && (lastClickChunkID == null || lastClickChunkID != clickChunkID))
@@ -465,7 +469,9 @@ namespace NoiseTerrain
                 chunks[x, y] = chunk;
             }
 
-            //need to calc the min/max tiles
+            //calc the min/max tiles maxY and min Y are flipped since positive y is down
+            minTile = new Vector2Int(minXID * roomChunks[0].width, maxYID * roomChunks[0].height + roomChunks[0].height - 1);
+            maxTile = new Vector2Int(maxXID * roomChunks[0].width + roomChunks[0].width - 1, minYID * roomChunks[0].height);
 
             PrintBoolMap();
             PrintFilledChunkIDs();
@@ -551,10 +557,12 @@ namespace NoiseTerrain
             {
                 for(int x = 0; x < width; x += 1)
                 {
-                    if (filledChunkIDs[x, y] > 9) {
-                        idMap += (char)((int)'A' + filledChunkIDs[x, y] % 10);
-                            }
-                    else idMap += filledChunkIDs[x, y];
+                    if (filledChunkIDs[x, y] > 9)
+                    {
+                        idMap += (char)((int)'A' + filledChunkIDs[x, y] - 10);
+                    }
+                    else
+                        idMap += filledChunkIDs[x, y];
                 }
                 idMap += "\n";
             }

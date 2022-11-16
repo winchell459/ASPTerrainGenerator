@@ -379,7 +379,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   cpus: 4
   timeout: 5
-  solver: {fileID: 1747112940}
+  solver: {fileID: 450358801}
   runOnStart: 0
   width: 0
   height: 0
@@ -614,6 +614,7 @@ MonoBehaviour:
   tileRules: {fileID: 11400000, guid: 6d490fca4911858419df1f0338be359f, type: 2}
   fixTileRules: 1
   fixSubChunk: {fileID: 797004055}
+  playerPrefab: {fileID: 7960479654452475114, guid: 496b3b00cd6ff2f4491c95874b5cd98e, type: 3}
   fixTileRuleBorder: 3
 --- !u!1 &1747112939
 GameObject:
