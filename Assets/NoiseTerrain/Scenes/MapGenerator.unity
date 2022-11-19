@@ -399,7 +399,7 @@ GameObject:
   - component: {fileID: 1398139181}
   - component: {fileID: 1398139180}
   - component: {fileID: 1398139182}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Tilemap
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -615,6 +615,7 @@ MonoBehaviour:
   fixTileRules: 1
   fixSubChunk: {fileID: 797004055}
   playerPrefab: {fileID: 7960479654452475114, guid: 496b3b00cd6ff2f4491c95874b5cd98e, type: 3}
+  clickFuction: 3
   fixTileRuleBorder: 3
 --- !u!1 &1747112939
 GameObject:

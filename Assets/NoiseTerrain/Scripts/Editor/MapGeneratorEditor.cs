@@ -31,5 +31,36 @@ namespace NoiseTerrain
     }
 
     [CustomEditor(typeof(ProceduralMapGenerator))]
-    public class ProceduralMapGeneratorEditor : MapGeneratorEditor { }
+    public class ProceduralMapGeneratorEditor : MapGeneratorEditor
+    {
+        public override void OnInspectorGUI()
+        {
+            ProceduralMapGenerator mapGenerator = (ProceduralMapGenerator)target;
+
+            if (DrawDefaultInspector())
+            {
+                if (mapGenerator.autoUpdate)
+                {
+                    mapGenerator.GenerateMap();
+                }
+            }
+            if (GUILayout.Button("Generate Map"))
+            {
+                mapGenerator.GenerateMap();
+            }
+            if (GUILayout.Button("Clear Map"))
+            {
+                mapGenerator.ClearMap();
+            }
+            if (GUILayout.Button("Set Room Chunk"))
+            {
+                mapGenerator.SetRoomChunk();
+            }
+
+            if (GUILayout.Button("Clear Room Chunk"))
+            {
+                mapGenerator.ClearRoomChunk();
+            }
+        }
+    }
 }

@@ -47,7 +47,7 @@ namespace NoiseTerrain
         }
         private void Update()
         {
-            HandleMouseClickResetChunk();
+            HandleMouseClick();
             Vector2Int chunkID = GetChunkID(target.position);
 
             for (int i = 0; i < visibleChunkIDs.Count; i += 1)
@@ -308,36 +308,85 @@ namespace NoiseTerrain
 
         Vector2Int lastClickChunkID;
         public GameObject playerPrefab;
-        private void HandleMouseClickResetChunk()
+        public enum HandleMouseClickFuction {resetChunk,placePlayer,selectPlatform,generatePath}
+        public HandleMouseClickFuction clickFuction;
+        private void HandleMouseClick()
         {
-            if (Input.GetMouseButtonUp(0))
+            if (clickFuction == HandleMouseClickFuction.generatePath)
             {
-                List<Chunk> visibleChunks = new List<Chunk>();
-                foreach(Vector2Int visibleChunkID in visibleChunkIDs)
+                if (roomChunk != null && Input.GetMouseButtonUp(0))
                 {
-                    visibleChunks.Add(GetChunk(visibleChunkID));
-                }
-                RoomChunk roomChunk = new RoomChunk(visibleChunks);
+                    // Vector2Int clickChunkID = GetChunkID(Camera.main.ScreenToWorldPoint(Input.mousePosition));
+                    Vector2Int clickTile = new Vector2Int((int)Mathf.Floor(Camera.main.ScreenToWorldPoint(Input.mousePosition).x), (int)Mathf.Floor(Camera.main.ScreenToWorldPoint(Input.mousePosition).y));
+                    if (roomChunk.GetPlatformID(clickTile) == 0)
+                    {
+                        roomChunk.PrintPath(clickTile,3);
+                    }
 
-                Vector2 spawn = new Vector2(roomChunk.minTile.x + 0.5f, -roomChunk.minTile.y + 0.5f);
-                Instantiate(playerPrefab, spawn, Quaternion.identity);
+                }
             }
-            //Vector2Int clickChunkID = GetChunkID(Camera.main.ScreenToWorldPoint(Input.mousePosition));
-            //if(Input.GetMouseButton(0) && (lastClickChunkID == null || lastClickChunkID != clickChunkID))
-            //{
-            //    Chunk clickedChunk = GetChunk(clickChunkID);
-            //    if (clickedChunk != null)
-            //    {
-            //        Debug.Log($"resetting {clickChunkID} chunk");
-            //        bool[,] resetBoolMap = GenerateBoolMap(clickChunkID);
-            //        clickedChunk.SetTiles(resetBoolMap);
-            //        visibleChunkIDs.Remove(clickChunkID);
-            //        toFixChunkIDs.Add(clickChunkID);
-            //        toDisplayChunks.Add(clickChunkID);
-            //    }
-            //    lastClickChunkID = clickChunkID;
-            //}
-            
+            else if (clickFuction == HandleMouseClickFuction.placePlayer)
+            {
+                if (roomChunk != null && Input.GetMouseButtonUp(0))
+                {
+                    // Vector2Int clickChunkID = GetChunkID(Camera.main.ScreenToWorldPoint(Input.mousePosition));
+                    Vector2Int clickTile = new Vector2Int((int)Mathf.Floor(Camera.main.ScreenToWorldPoint(Input.mousePosition).x), (int)Mathf.Floor(Camera.main.ScreenToWorldPoint(Input.mousePosition).y));
+                    if (roomChunk.GetPlatformID(clickTile) == 0)
+                    {
+                        Vector2 spawn = new Vector2(clickTile.x + 0.5f, clickTile.y + 0.5f);
+                        Instantiate(playerPrefab, spawn, Quaternion.identity);
+                    }
+                    
+                }
+            }else if(clickFuction == HandleMouseClickFuction.resetChunk)
+            {
+                Vector2Int clickChunkID = GetChunkID(Camera.main.ScreenToWorldPoint(Input.mousePosition));
+                if (Input.GetMouseButton(0) && (lastClickChunkID == null || lastClickChunkID != clickChunkID))
+                {
+                    Chunk clickedChunk = GetChunk(clickChunkID);
+                    if (clickedChunk != null)
+                    {
+                        Debug.Log($"resetting {clickChunkID} chunk");
+                        bool[,] resetBoolMap = GenerateBoolMap(clickChunkID);
+                        clickedChunk.SetTiles(resetBoolMap);
+                        visibleChunkIDs.Remove(clickChunkID);
+                        toFixChunkIDs.Add(clickChunkID);
+                        toDisplayChunks.Add(clickChunkID);
+                    }
+                    lastClickChunkID = clickChunkID;
+                }
+            }else if (clickFuction == HandleMouseClickFuction.selectPlatform)
+            {
+                if (roomChunk != null && Input.GetMouseButtonUp(0))
+                {
+                    Vector2Int clickTile = new Vector2Int ((int)Mathf.Floor(Camera.main.ScreenToWorldPoint(Input.mousePosition).x), (int)Mathf.Floor(Camera.main.ScreenToWorldPoint(Input.mousePosition).y));
+                    int platformID = roomChunk.GetPlatformID(clickTile);
+                    string id = "";
+                    if (platformID > 9)
+                        id += (char)((int)'A' + platformID - 10);
+                    else
+                        id += platformID;
+                    Debug.Log($"{id} -> {platformID}");
+                    
+                }
+            }
+
+
+
+        }
+        RoomChunk roomChunk;
+        public void SetRoomChunk()
+        {
+            List<Chunk> visibleChunks = new List<Chunk>();
+            foreach (Vector2Int visibleChunkID in visibleChunkIDs)
+            {
+                visibleChunks.Add(GetChunk(visibleChunkID));
+            }
+            roomChunk = new RoomChunk(visibleChunks);
+        }
+        public void ClearRoomChunk()
+        {
+
         }
 
         private void HandleFixTileRulesThread()
@@ -433,149 +482,5 @@ namespace NoiseTerrain
 
     }
 
-    public class RoomChunk
-    {
-        public int width, height;
-        public Vector2Int minTile, maxTile;
-        Chunk[,] chunks;
-
-        public List<FilledChunk> filledChunks = new List<FilledChunk>();
-        public int[,] filledChunkIDs;
-
-        public RoomChunk(List<Chunk> roomChunks)
-        {
-            int minYID = int.MaxValue;
-            int minXID = int.MaxValue;
-            int maxYID = int.MinValue;
-            int maxXID = int.MinValue;
-
-            foreach(Chunk chunk in roomChunks)
-            {
-                minXID = Mathf.Min(chunk.chunkID.x, minXID);
-                minYID = Mathf.Min(chunk.chunkID.y, minYID);
-                maxXID = Mathf.Max(chunk.chunkID.x, maxXID);
-                maxYID = Mathf.Max(chunk.chunkID.y, maxYID);
-            }
-
-            Vector2Int roomChunkSize = new Vector2Int(maxXID - minXID + 1, maxYID - minYID + 1);
-            chunks = new Chunk[roomChunkSize.x, roomChunkSize.y];
-            width = roomChunkSize.x * roomChunks[0].width;
-            height = roomChunkSize.y * roomChunks[0].height;
-
-            foreach (Chunk chunk in roomChunks)
-            {
-                int x = chunk.chunkID.x - minXID;
-                int y = chunk.chunkID.y - minYID;
-                chunks[x, y] = chunk;
-            }
-
-            //calc the min/max tiles maxY and min Y are flipped since positive y is down
-            minTile = new Vector2Int(minXID * roomChunks[0].width, maxYID * roomChunks[0].height + roomChunks[0].height - 1);
-            maxTile = new Vector2Int(maxXID * roomChunks[0].width + roomChunks[0].width - 1, minYID * roomChunks[0].height);
-
-            PrintBoolMap();
-            PrintFilledChunkIDs();
-        }
-        public void PrintBoolMap()
-        {
-            bool[,] boolMap = GetBoolMap();
-            string map0_1 = "";
-            for(int y = 0; y < height; y += 1)
-            {
-                for(int x = 0; x < width; x += 1)
-                {
-                    map0_1 += boolMap[x, y] ? "1" : "0";
-                }
-                map0_1 += "\n";
-            }
-            Debug.Log(map0_1);
-        }
-        public bool[,] GetBoolMap()
-        {
-            bool[,] boolMap = new bool[width, height];
-            for(int y = 0; y < height; y += 1)
-            {
-                for(int x = 0; x < width; x += 1)
-                {
-                    boolMap[x, y] = GetTile(x, y);
-                }
-            }
-            return boolMap;
-        }
-
-        public bool GetTile(int x, int y)
-        {
-            int width = chunks[0, 0].width;
-            int height = chunks[0, 0].height;
-            int xID = x / width;
-            int yID = y / height;
-            x = x%width;
-            y = y%height;
-
-            return chunks[xID, yID].GetTile(x, y);
-        }
-
-        public void SetFilledChunkIDs()
-        {
-            filledChunkIDs = new int[width, height];
-            List<Vector2Int> toVisit = new List<Vector2Int>();
-            List<Vector2Int> visited = new List<Vector2Int>();
-            for(int x = 0; x < width; x += 1)
-            {
-                for(int y = 0; y < height; y += 1)
-                {
-                    if(GetTile(x,y))toVisit.Add(new Vector2Int(x, y));
-                }
-            }
-            int filledChunkID = 0;
-            while(toVisit.Count > 0)
-            {
-                filledChunkID += 1;
-                List<Vector2Int> frontier = new List<Vector2Int>();
-                frontier.Add(toVisit[0]);
-                //toVisit.RemoveAt(0);
-                while (frontier.Count > 0)
-                {
-                    Vector2Int loc = frontier[0];
-                    frontier.RemoveAt(0);
-                    filledChunkIDs[loc.x, loc.y] = filledChunkID;
-                    visited.Add(loc);
-                    if (!toVisit.Remove(loc)) Debug.Log(loc + " removed");
-                    int x = loc.x, y = loc.y;
-                    if (x > 0 && GetTile(x - 1, y) && !visited.Contains(new Vector2Int(x - 1, y)) && !frontier.Contains(new Vector2Int(x - 1, y))) frontier.Add(new Vector2Int(x - 1, y));
-                    if (y > 0 && GetTile(x, y - 1) && !visited.Contains(new Vector2Int(x, y - 1)) && !frontier.Contains(new Vector2Int(x, y - 1))) frontier.Add(new Vector2Int(x, y - 1));
-                    if (x < width - 1 && GetTile(x + 1, y ) && !visited.Contains(new Vector2Int(x + 1, y)) && !frontier.Contains(new Vector2Int(x + 1, y))) frontier.Add(new Vector2Int(x + 1, y));
-                    if (y < height - 1 && GetTile(x, y + 1) && !visited.Contains(new Vector2Int(x, y + 1)) && !frontier.Contains(new Vector2Int(x, y + 1))) frontier.Add(new Vector2Int(x, y + 1));
-                }
-            }
-        }
-        public void PrintFilledChunkIDs()
-        {
-            SetFilledChunkIDs();
-            string idMap = "";
-            for(int y = 0; y < height; y += 1)
-            {
-                for(int x = 0; x < width; x += 1)
-                {
-                    if (filledChunkIDs[x, y] > 9)
-                    {
-                        idMap += (char)((int)'A' + filledChunkIDs[x, y] - 10);
-                    }
-                    else
-                        idMap += filledChunkIDs[x, y];
-                }
-                idMap += "\n";
-            }
-            Debug.Log(idMap);
-        }
-    }
-
-    public class FilledChunk
-    {
-        public List<Vector2Int> filledTiles;
-        public FilledChunk(List<Vector2Int> filledTiles)
-        {
-            this.filledTiles = filledTiles;
-        }
-    }
+    
 }

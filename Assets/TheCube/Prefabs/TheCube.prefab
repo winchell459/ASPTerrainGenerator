@@ -272,8 +272,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   CharacterSprite: {fileID: 7960479654452475114}
-  speed: 6
-  jumpForce: 6
+  speed: 5.5
+  jumpForce: 16
   maxGravityForce: 10
   isGroundedCheckers:
   - {fileID: 7960479654268356709}
@@ -290,7 +290,7 @@ MonoBehaviour:
   - {fileID: 7960479653753037515}
   wallLayer:
     serializedVersion: 2
-    m_Bits: 2368
+    m_Bits: 64
   rememberGroundedFor: 0.1
   fallMultiplier: 3.5
   lowJumpMultiplier: 4
