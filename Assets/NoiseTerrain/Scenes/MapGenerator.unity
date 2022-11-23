@@ -606,7 +606,7 @@ MonoBehaviour:
   _chunkRadius: {x: 1, y: 1}
   _tileRulesRadius: {x: 1, y: 1}
   _tileRulesFixRadius: {x: 1, y: 1}
-  tileRadius: {x: 4, y: 3}
+  tileRadius: {x: 2, y: 1}
   visibleChunkIDs: []
   toFixChunkIDs: []
   toDisplayChunks: []
