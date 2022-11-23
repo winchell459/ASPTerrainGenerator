@@ -361,13 +361,16 @@ namespace NoiseTerrain
                 {
                     Vector2Int clickTile = new Vector2Int ((int)Mathf.Floor(Camera.main.ScreenToWorldPoint(Input.mousePosition).x), (int)Mathf.Floor(Camera.main.ScreenToWorldPoint(Input.mousePosition).y));
                     int platformID = roomChunk.GetPlatformID(clickTile);
+                    int filledChunkID = platformID / 256;
+                    platformID %= 256;
                     string id = "";
                     if (platformID > 9)
                         id += (char)((int)'A' + platformID - 10);
                     else
                         id += platformID;
-                    Debug.Log($"{id} -> {platformID}");
-                    
+                    Debug.Log($"{filledChunkID} - {id}");
+
+
                 }
             }
 

@@ -48,6 +48,7 @@ namespace NoiseTerrain
             PrintBoolMap();
             PrintFilledChunkIDs();
             SetFilledChunks(3);
+            PrintPlatformIDs();
         }
         public void PrintBoolMap()
         {
@@ -167,14 +168,61 @@ namespace NoiseTerrain
 
         public int GetPlatformID(Vector2Int tile)
         {
-            if (tile.x - minTile.x < 0 || tile.x - minTile.x > width-1 || -tile.y - maxTile.y < 0 || -tile.y - maxTile.y > height-1)
+            if (tile.x - minTile.x < 0 || tile.x - minTile.x > width - 1 || -tile.y - maxTile.y < 0 || -tile.y - maxTile.y > height - 1)
                 return -1;
             else
             {
-                return filledChunks[filledChunkIDs[tile.x - minTile.x, -tile.y - maxTile.y] - 1].GetPlatformID(new Vector2Int(tile.x - minTile.x, -tile.y - maxTile.y));
-                return filledChunkIDs[tile.x - minTile.x, -tile.y - maxTile.y];
+                int filledChunkID = filledChunkIDs[tile.x - minTile.x, -tile.y - maxTile.y] * 256;
+                if (filledChunkIDs[tile.x - minTile.x, -tile.y - maxTile.y] > 0)
+                {
+                    if (filledChunks[filledChunkIDs[tile.x - minTile.x, -tile.y - maxTile.y] - 1].GetPlatformID(new Vector2Int(tile.x - minTile.x, -tile.y - maxTile.y)) > 0)
+                        return filledChunkID + filledChunks[filledChunkIDs[tile.x - minTile.x, -tile.y - maxTile.y] - 1].GetPlatformID(new Vector2Int(tile.x - minTile.x, -tile.y - maxTile.y));
+                    else
+                        return filledChunkID;
+                }
+                    
+                return filledChunkID;
             }
-                
+
+        }
+        public void PrintPlatformIDs()
+        {
+            string[,] platformIDs = new string[width, height];
+            for(int i = 0; i < filledChunkIDs.GetLength(0); i += 1)
+            {
+                for (int j = 0; j < filledChunkIDs.GetLength(1); j += 1)
+                {
+                    if (filledChunkIDs[i, j] == 0) platformIDs[i, j] = " ";
+                    else platformIDs[i, j] = "0";
+                }
+            }
+            int platformID = 1;
+            foreach(FilledChunk chunk in filledChunks)
+            {
+                foreach(PlatformChunk platformChunk in chunk.platforms)
+                {
+                    platformID += 1;
+                    foreach(Vector2Int ground in platformChunk.groundTiles)
+                    {
+                        if(platformID > 9) platformIDs[ground.x, ground.y] = ((char)(/*(int)*/'A' + platformID - 10)).ToString();
+                        else platformIDs[ground.x, ground.y] = (platformID).ToString();
+                    }
+                }
+            }
+            Print(platformIDs);
+        }
+        public void Print(string[,] matrix)
+        {
+            string map = "";
+            for (int y = 0; y < height; y += 1)
+            {
+                for (int x = 0; x < width; x += 1)
+                {
+                    map += matrix[x, y];
+                }
+                map += "\n";
+            }
+            Debug.Log(map);
         }
 
         public void PrintPath(Vector2Int start, int jumpHeight)
@@ -206,7 +254,6 @@ namespace NoiseTerrain
             }
             List<Vector2Int> frontier = new List<Vector2Int>();
             frontier.Add(new Vector2Int(start.x - minTile.x, -start.y - maxTile.y));
-            //path[frontier[0].x, frontier[0].y] = jumpHeight;
             while (frontier.Count > 0)
             {
                 exitLoop -= 1;
@@ -304,7 +351,7 @@ namespace NoiseTerrain
         //}
         public int GetPlatformID(Vector2Int tile)
         {
-            Debug.Log($"{tile.x - minX} {-tile.y - maxY} minX: {minX} maxY: {maxY}");
+            //Debug.Log($"{tile.x - minX} {-tile.y - maxY} minX: {minX} maxY: {maxY}");
             return platformIDs[tile.x - minX, tile.y - minY];
         }
         public void SetPlatforms(RoomChunk roomChunk, int jumpHeight)
@@ -344,7 +391,8 @@ namespace NoiseTerrain
                     frontier.RemoveAt(0);
                     visited.Add(current);
                     toVisit.Remove(current);
-                    //Vector2Int left, right ;
+
+                    platformIDs[current.x - minX, current.y - minY] = platformID;
 
                     FindPlatformNeighbor(-1, current, jumpHeight, platformID, toVisit, visited, frontier,roomChunk);
                     FindPlatformNeighbor(1, current, jumpHeight, platformID, toVisit, visited, frontier,roomChunk);
