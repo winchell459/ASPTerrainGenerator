@@ -185,6 +185,11 @@ namespace NoiseTerrain
             }
 
         }
+        public int GetPlatformID(int x, int y)
+        {
+            Debug.Log(GetPlatformID(new Vector2Int(x + minTile.x, -y - maxTile.y)));
+            return GetPlatformID(new Vector2Int(x + minTile.x, -y - maxTile.y));
+        }
         public void PrintPlatformIDs()
         {
             string[,] platformIDs = new string[width, height];
@@ -225,9 +230,9 @@ namespace NoiseTerrain
             Debug.Log(map);
         }
 
-        public void PrintPath(Vector2Int start, int jumpHeight)
+        public void PrintPath(Vector2Int start, int jumpHeight, int platformID)
         {
-            int[,] path = GetPath(start, jumpHeight);
+            int[,] path = GetPath(start, jumpHeight, platformID);
             string pathMap = "";
             for (int y = 0; y < height; y += 1)
             {
@@ -240,8 +245,20 @@ namespace NoiseTerrain
             }
             Debug.Log(pathMap);
         }
+        public PlatformChunk GetPlatform(int platformID)
+        {
+            int filledChunkID = platformID / 256;
+            platformID %= 256;
+            return filledChunks[filledChunkID-1].platforms[platformID-1];
+        }
+        public List<int> GetPlatformEdges(int platformID, int jumpHeight)
+        {
+            PlatformChunk platform = GetPlatform(platformID);
+            platform.SetPath(platformID, this, jumpHeight);
+            return platform.connectedPlatforms;
+        }
 
-        public int[,] GetPath(Vector2Int start, int jumpHeight)
+        public int[,] GetPath(Vector2Int start, int jumpHeight, int platformID)
         {
             int exitLoop = 10000;
             int[,] path = new int[width, height];
@@ -266,11 +283,11 @@ namespace NoiseTerrain
                 frontier.RemoveAt(0);
                 int x = current.x;
                 int y = current.y;
-                Debug.Log($"visiting {current}");
+                //Debug.Log($"visiting {current}");
                 path[x, y] = Mathf.Max(0, path[x, y]);
 
                 //jumping
-                if (y < height - 1 && y > 0 && GetTile(x, y + 1) && !GetTile(x, y - 1))
+                if (y < height - 1 && y > 0 && GetTile(x, y + 1) && !GetTile(x, y - 1) && (platformID == 0 || platformID == GetPlatformID(x,y+1)))
                 {
                     AddMaxToPath(frontier, path, jumpHeight - 1, x, y - 1);
                 }
@@ -479,6 +496,29 @@ namespace NoiseTerrain
 
     public class PlatformChunk
     {
+        public int platformID;
         public List<Vector2Int> groundTiles = new List<Vector2Int>();
+        public int[,] path;
+        public List<int> connectedPlatforms;
+        public void SetPath(int platformID, RoomChunk roomChunk, int jumpHeight)
+        {
+            this.platformID = platformID;
+            path = roomChunk.GetPath(new Vector2Int(groundTiles[0].x + roomChunk.minTile.x, - groundTiles[0].y - 1 - roomChunk.maxTile.y), jumpHeight, platformID);
+            SetPlatformEdges(platformID, roomChunk);
+        }
+        public void SetPlatformEdges(int platformID, RoomChunk roomChunk)
+        {
+            connectedPlatforms = new List<int>();
+            for(int x = 0; x < path.GetLength(0); x += 1)
+            {
+                for(int y = 0; y < path.GetLength(1); y += 1)
+                {
+                    if (path[x, y] == 0 && roomChunk.GetTile(x, y + 1) && roomChunk.GetPlatformID(x, y + 1) != platformID)
+                    {
+                        connectedPlatforms.Add(roomChunk.GetPlatformID(x, y + 1));
+                    }
+                }
+            }
+        }
     }
 }
