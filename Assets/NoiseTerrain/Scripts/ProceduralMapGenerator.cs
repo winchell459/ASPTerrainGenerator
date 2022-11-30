@@ -377,7 +377,7 @@ namespace NoiseTerrain
                     string edges = "";
                     foreach(int edge in platformEdges)
                     {
-                        edges += edge + " ";
+                        edges += edge / 256 + "-" + edge % 256 + " ";
                     }
 
                     Debug.Log($"{filledChunkID} - {id} : {edges}");
