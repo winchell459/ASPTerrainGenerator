@@ -23,7 +23,7 @@ namespace NoiseTerrain
         public List<Vector2Int> toDisplayChunks = new List<Vector2Int>();
 
         public Transform target;
-
+        public int jumpHeight = 3;
         
         public TileRules tileRules;
 
@@ -320,11 +320,11 @@ namespace NoiseTerrain
                     Vector2Int clickTile = new Vector2Int((int)Mathf.Floor(Camera.main.ScreenToWorldPoint(Input.mousePosition).x), (int)Mathf.Floor(Camera.main.ScreenToWorldPoint(Input.mousePosition).y));
                     if (roomChunk.GetPlatformID(clickTile) == 0)
                     {
-                        roomChunk.PrintPath(clickTile,3, roomChunk.GetPlatformID(clickTile));
+                        roomChunk.PrintPath(clickTile, jumpHeight, roomChunk.GetPlatformID(clickTile));
                     }else if(roomChunk.GetPlatformID(clickTile)%256 > 0)
                     {
                         Debug.Log("Finding platform path");
-                        roomChunk.PrintPath(new Vector2Int(clickTile.x, clickTile.y + 1), 3, roomChunk.GetPlatformID(clickTile));
+                        roomChunk.PrintPath(new Vector2Int(clickTile.x, clickTile.y + 1), jumpHeight, roomChunk.GetPlatformID(clickTile));
                     }
 
                 }
@@ -366,7 +366,7 @@ namespace NoiseTerrain
                     Vector2Int clickTile = new Vector2Int ((int)Mathf.Floor(Camera.main.ScreenToWorldPoint(Input.mousePosition).x), (int)Mathf.Floor(Camera.main.ScreenToWorldPoint(Input.mousePosition).y));
                     int platformID = roomChunk.GetPlatformID(clickTile);
                     int filledChunkID = platformID / 256;
-                    List<int> platformEdges = roomChunk.GetPlatformEdges(platformID, 3);
+                    List<int> platformEdges = roomChunk.GetPlatformEdges(platformID, jumpHeight);
                     platformID %= 256;
                     string id = "";
                     if (platformID > 9)
@@ -397,7 +397,7 @@ namespace NoiseTerrain
             {
                 visibleChunks.Add(GetChunk(visibleChunkID));
             }
-            roomChunk = new RoomChunk(visibleChunks);
+            roomChunk = new RoomChunk(visibleChunks, jumpHeight);
         }
         public void ClearRoomChunk()
         {

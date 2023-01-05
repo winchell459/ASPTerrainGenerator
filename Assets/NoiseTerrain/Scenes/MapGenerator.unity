@@ -643,7 +643,7 @@ MonoBehaviour:
   height: 9
   noiseScale: 8
   octaves: 4
-  persistance: 0.427
+  persistance: 0.415
   lacunarity: 0.25
   seed: 0
   offset: {x: 0, y: 0}
@@ -653,11 +653,12 @@ MonoBehaviour:
   _chunkRadius: {x: 1, y: 1}
   _tileRulesRadius: {x: 1, y: 1}
   _tileRulesFixRadius: {x: 1, y: 1}
-  tileRadius: {x: 2, y: 1}
+  tileRadius: {x: 4, y: 3}
   visibleChunkIDs: []
   toFixChunkIDs: []
   toDisplayChunks: []
   target: {fileID: 1486576023}
+  jumpHeight: 3
   tileRules: {fileID: 11400000, guid: 6d490fca4911858419df1f0338be359f, type: 2}
   fixTileRules: 1
   fixSubChunk: {fileID: 797004055}
