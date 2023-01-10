@@ -30,11 +30,13 @@ namespace NoiseTerrain
         List<Chunk> chunks = new List<Chunk>();
         //public bool debugFixTileRules;
         public bool fixTileRules;
+        public bool exitFixTileRules = false;
         Thread handleFixTileRulesThread;
         public FixSubChunk fixSubChunk;
         private void OnDestroy()
         {
             fixTileRules = false;
+            exitFixTileRules = true;
             fixSubChunk.fixTileRules = fixTileRules;
             handleFixTileRulesThread.Abort();
             Debug.Log("Exit");
@@ -45,6 +47,7 @@ namespace NoiseTerrain
             handleFixTileRulesThread.Start();
             //fixTileRules = true;
         }
+        public bool debugVisibleChunkClearOverride = false;
         private void Update()
         {
             HandleMouseClick();
@@ -157,24 +160,28 @@ namespace NoiseTerrain
                     }
 
                     //find chunks to be removed
-                    for (int i = visibleChunkIDs.Count - 1; i >= 0; i -= 1)
+                    if (!debugVisibleChunkClearOverride)
                     {
+                        for (int i = visibleChunkIDs.Count - 1; i >= 0; i -= 1)
+                        {
 
-                        if (!toDisplayChunks.Contains(visibleChunkIDs[i]) && !this.toDisplayChunks.Contains(visibleChunkIDs[i]))
-                        {
-                            //Debug.LogWarning($"Removing {visibleChunkIDs[i]}");
-                            ClearMap(visibleChunkIDs[i]);
-                            visibleChunkIDs.RemoveAt(i);
-                            
-                        }
-                        else if (!toDisplayChunks.Contains(visibleChunkIDs[i]))
-                        {
-                            //Debug.LogWarning($"Removing 2 {visibleChunkIDs[i]} {this.toDisplayChunks.Remove(visibleChunkIDs[i])}"); // must remove next line for debug
-                            this.toDisplayChunks.Remove(visibleChunkIDs[i]);
-                            visibleChunkIDs.RemoveAt(i);
-                            
+                            if (!toDisplayChunks.Contains(visibleChunkIDs[i]) && !this.toDisplayChunks.Contains(visibleChunkIDs[i]))
+                            {
+                                //Debug.LogWarning($"Removing {visibleChunkIDs[i]}");
+                                ClearMap(visibleChunkIDs[i]);
+                                visibleChunkIDs.RemoveAt(i);
+
+                            }
+                            else if (!toDisplayChunks.Contains(visibleChunkIDs[i]))
+                            {
+                                //Debug.LogWarning($"Removing 2 {visibleChunkIDs[i]} {this.toDisplayChunks.Remove(visibleChunkIDs[i])}"); // must remove next line for debug
+                                this.toDisplayChunks.Remove(visibleChunkIDs[i]);
+                                visibleChunkIDs.RemoveAt(i);
+
+                            }
                         }
                     }
+                    
 
                     //build chunks
                     for (int i = 0; i < toBuildChunks.Count; i += 1)
@@ -203,7 +210,7 @@ namespace NoiseTerrain
                     //fix tileRules
                     for (int i = 0; i < toFixTileRulesChunks.Count; i += 1)
                     {
-                        if (!toFixChunkIDs.Contains(toFixTileRulesChunks[i]) && !visibleChunkIDs.Contains(toFixTileRulesChunks[i]) && !this.toDisplayChunks.Contains(toFixTileRulesChunks[i]))
+                        if (!toFixChunkIDs.Contains(toFixTileRulesChunks[i]) /*&& !visibleChunkIDs.Contains(toFixTileRulesChunks[i]) && !this.toDisplayChunks.Contains(toFixTileRulesChunks[i])*/)
                         {
                             Chunk chunk = GetChunk(toFixTileRulesChunks[i]);
                             Utility.CheckTileRules(chunk,tileRules); // need to check in case invalid were fixed in an overlapping subchunk
@@ -404,52 +411,57 @@ namespace NoiseTerrain
 
         }
 
+        
         private void HandleFixTileRulesThread()
         {
-            while (fixTileRules)
+            while (!exitFixTileRules)
             {
                 //if (!fixSubChunk.ready)
                 //{
                 //    //Debug.LogWarning("Waiting for fixSubChunk.ready");
                 //    continue;
                 //}
-                Vector2Int chunkID = Vector2Int.zero;
-                bool chunkIDFound = false;
-                lock (toFixChunkIDs)
+                if (fixTileRules)
                 {
-                    if (toFixChunkIDs.Count > 0)
+                    Vector2Int chunkID = Vector2Int.zero;
+                    bool chunkIDFound = false;
+                    lock (toFixChunkIDs)
                     {
-                        chunkID = toFixChunkIDs[0];
-                        chunkIDFound = true;
-                    }
-
-                }
-                if (chunkIDFound)
-                {
-                    Chunk chunk = GetChunk(chunkID);
-                    if (chunk != null)
-                    {
-                        lock (chunk)
+                        if (toFixChunkIDs.Count > 0)
                         {
-                            Utility.CheckTileRules(chunk,tileRules); // need to check in case invalid were fixed in an overlapping subchunk
-                            if (chunk.hasInvalidTile)
-                            {
-                                HandleFixTileRules(chunk);
+                            chunkID = toFixChunkIDs[0];
+                            chunkIDFound = true;
+                        }
 
+                    }
+                    if (chunkIDFound)
+                    {
+                        Chunk chunk = GetChunk(chunkID);
+                        if (chunk != null)
+                        {
+                            lock (chunk)
+                            {
+                                Utility.CheckTileRules(chunk, tileRules); // need to check in case invalid were fixed in an overlapping subchunk
+                                if (chunk.hasInvalidTile)
+                                {
+                                    HandleFixTileRules(chunk);
+
+                                }
+                            }
+
+                            lock (toFixChunkIDs)
+                            {
+                                toFixChunkIDs.RemoveAt(0);
+                                chunk.hasInvalidTile = false;
                             }
                         }
 
-                        lock (toFixChunkIDs)
-                        {
-                            toFixChunkIDs.RemoveAt(0);
-                            chunk.hasInvalidTile = false;
-                        }
                     }
-
                 }
+                
 
             }
-
+            Debug.Log("Thread Exit Normal");
         }
 
         public int fixTileRuleBorder = 2;

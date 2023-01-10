@@ -639,11 +639,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   fullTile: {fileID: 11400000, guid: 80cc21b320a3242ee9539b7d613a3a60, type: 2}
   fullTilemap: {fileID: 1398139181}
-  width: 4
-  height: 3
+  width: 12
+  height: 9
   noiseScale: 8
   octaves: 4
-  persistance: 0.415
+  persistance: 1
   lacunarity: 0.25
   seed: 0
   offset: {x: 0, y: 0}
@@ -653,7 +653,7 @@ MonoBehaviour:
   _chunkRadius: {x: 1, y: 1}
   _tileRulesRadius: {x: 1, y: 1}
   _tileRulesFixRadius: {x: 1, y: 1}
-  tileRadius: {x: 13, y: 10}
+  tileRadius: {x: 4, y: 3}
   visibleChunkIDs: []
   toFixChunkIDs: []
   toDisplayChunks: []
@@ -661,7 +661,9 @@ MonoBehaviour:
   jumpHeight: 3
   tileRules: {fileID: 11400000, guid: 6d490fca4911858419df1f0338be359f, type: 2}
   fixTileRules: 1
+  exitFixTileRules: 0
   fixSubChunk: {fileID: 797004055}
+  debugVisibleChunkClearOverride: 1
   playerPrefab: {fileID: 7960479654452475114, guid: 496b3b00cd6ff2f4491c95874b5cd98e, type: 3}
   clickFuction: 3
   fixTileRuleBorder: 3
