@@ -10,6 +10,10 @@ namespace NoiseTerrain
         public List<Vector2Int> groundTiles = new List<Vector2Int>();
         public int[,] path;
         public List<int> connectedPlatforms;
+        public Vector2Int GetTilePos(Vector2Int tile, RoomChunk roomChunk)
+        {
+            return new Vector2Int(tile.x + roomChunk.minTile.x, -tile.y + 1 - roomChunk.maxTile.y);
+        }
         public void SetPath(int platformID, RoomChunk roomChunk, int jumpHeight)
         {
             this.platformID = platformID;

@@ -63,6 +63,7 @@ namespace NoiseTerrain
                 map0_1 += "\n";
             }
             Debug.Log(map0_1);
+
         }
         public bool[,] GetBoolMap()
         {
@@ -228,6 +229,7 @@ namespace NoiseTerrain
                 map += "\n";
             }
             Debug.Log(map);
+            Clingo_02.ClingoUtil.CreateFile(map, "debugStringMatrix.txt");
         }
 
         public void PrintPath(Vector2Int start, int jumpHeight, int platformID)
@@ -244,6 +246,7 @@ namespace NoiseTerrain
                 pathMap += "\n";
             }
             Debug.Log(pathMap);
+            Clingo_02.ClingoUtil.CreateFile(pathMap, "debugPath.txt");
         }
         public PlatformChunk GetPlatform(int platformID)
         {
@@ -254,13 +257,16 @@ namespace NoiseTerrain
         public List<int> GetPlatformEdges(int platformID, int jumpHeight)
         {
             PlatformChunk platform = GetPlatform(platformID);
-            platform.SetPath(platformID, this, jumpHeight);
+            if(platform.connectedPlatforms == null)
+            {
+                platform.SetPath(platformID, this, jumpHeight);
+            }
             return platform.connectedPlatforms;
         }
 
         public int[,] GetPath(Vector2Int start, int jumpHeight, int platformID)
         {
-            int exitLoop = 10000;
+            int exitLoop = 100000;
             int[,] path = new int[width, height];
             for(int i = 0; i < width; i += 1)
             {

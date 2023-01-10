@@ -48,10 +48,26 @@ namespace NoiseTerrain
             //fixTileRules = true;
         }
         public bool debugVisibleChunkClearOverride = false;
+        public bool displayPlatformGraph = false;
+        List<PlatformChunk> platformGraph;
         private void Update()
         {
             HandleMouseClick();
             Vector2Int chunkID = GetChunkID(target.position);
+
+            if (displayPlatformGraph)
+            {
+                foreach(PlatformChunk platform in platformGraph)
+                {
+                    foreach(int sinkID in platform.connectedPlatforms)
+                    {
+                        PlatformChunk sink = roomChunk.GetPlatform(sinkID);
+                        Vector2 start = platform.GetTilePos(platform.groundTiles[0], roomChunk);
+                        Vector2 dir = sink.GetTilePos( sink.groundTiles[0], roomChunk) - start;
+                        Debug.DrawRay(start, dir, Color.red);
+                    }
+                }
+            }
 
             for (int i = 0; i < visibleChunkIDs.Count; i += 1)
             {
@@ -315,7 +331,7 @@ namespace NoiseTerrain
 
         Vector2Int lastClickChunkID;
         public GameObject playerPrefab;
-        public enum HandleMouseClickFuction {resetChunk,placePlayer,selectPlatform,generatePath}
+        public enum HandleMouseClickFuction {resetChunk,placePlayer,selectPlatform,generatePath,generatePlatformGraph}
         public HandleMouseClickFuction clickFuction;
         private void HandleMouseClick()
         {
@@ -389,7 +405,20 @@ namespace NoiseTerrain
 
                     Debug.Log($"{filledChunkID} - {id} : {edges}");
 
+                    
+                }
+            }
+            else if (clickFuction == HandleMouseClickFuction.generatePlatformGraph)
+            {
+                if (roomChunk != null && Input.GetMouseButtonUp(0))
+                {
+                    displayPlatformGraph = false;
+                    Vector2Int clickTile = new Vector2Int((int)Mathf.Floor(Camera.main.ScreenToWorldPoint(Input.mousePosition).x), (int)Mathf.Floor(Camera.main.ScreenToWorldPoint(Input.mousePosition).y));
 
+                    //graph connections
+                    startingPlatformID = roomChunk.GetPlatformID(clickTile);
+                    Thread thread = new Thread(GenerateChunkGraphThread);
+                    thread.Start();
                 }
             }
 
@@ -409,6 +438,25 @@ namespace NoiseTerrain
         public void ClearRoomChunk()
         {
 
+        }
+        private int startingPlatformID;
+        private void GenerateChunkGraphThread()
+        {
+            List<int> platformEdges = roomChunk.GetPlatformEdges(startingPlatformID, jumpHeight);
+            List<PlatformChunk> graphList = new List<PlatformChunk>();
+            graphList.Add(roomChunk.GetPlatform(startingPlatformID));
+            foreach (int edge in platformEdges)
+            {
+                PlatformChunk platform = roomChunk.GetPlatform(edge);
+                if (!graphList.Contains(platform))
+                {
+                    roomChunk.GetPlatformEdges(edge, jumpHeight);
+                    graphList.Add(platform);
+                }
+
+            }
+            platformGraph = graphList;
+            displayPlatformGraph = true;
         }
 
         

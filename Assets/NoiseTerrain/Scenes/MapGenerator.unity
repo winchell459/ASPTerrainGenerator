@@ -660,12 +660,13 @@ MonoBehaviour:
   target: {fileID: 1486576023}
   jumpHeight: 3
   tileRules: {fileID: 11400000, guid: 6d490fca4911858419df1f0338be359f, type: 2}
-  fixTileRules: 1
+  fixTileRules: 0
   exitFixTileRules: 0
   fixSubChunk: {fileID: 797004055}
   debugVisibleChunkClearOverride: 1
+  displayPlatformGraph: 0
   playerPrefab: {fileID: 7960479654452475114, guid: 496b3b00cd6ff2f4491c95874b5cd98e, type: 3}
-  clickFuction: 3
+  clickFuction: 4
   fixTileRuleBorder: 3
 --- !u!1 &1747112939
 GameObject:
