@@ -266,7 +266,7 @@ namespace NoiseTerrain
 
         public int[,] GetPath(Vector2Int start, int jumpHeight, int platformID)
         {
-            int exitLoop = 100000;
+            int exitLoop = 1000;
             int[,] path = new int[width, height];
             for(int i = 0; i < width; i += 1)
             {

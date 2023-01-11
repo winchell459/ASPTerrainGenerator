@@ -49,7 +49,7 @@ namespace NoiseTerrain
         }
         public bool debugVisibleChunkClearOverride = false;
         public bool displayPlatformGraph = false;
-        List<PlatformChunk> platformGraph;
+        List<PlatformChunk> platformGraph = new List<PlatformChunk>();
         private void Update()
         {
             HandleMouseClick();
@@ -440,18 +440,37 @@ namespace NoiseTerrain
 
         }
         private int startingPlatformID;
+        public int generateChunkGraphDepth = 0;
         private void GenerateChunkGraphThread()
         {
-            List<int> platformEdges = roomChunk.GetPlatformEdges(startingPlatformID, jumpHeight);
+            List<int> platformNodes = new List<int>();//roomChunk.GetPlatformEdges(startingPlatformID, jumpHeight);
+            platformNodes.Add(startingPlatformID);
             List<PlatformChunk> graphList = new List<PlatformChunk>();
-            graphList.Add(roomChunk.GetPlatform(startingPlatformID));
-            foreach (int edge in platformEdges)
+            //graphList.Add(roomChunk.GetPlatform(startingPlatformID));
+            int graphListIndex = 0;
+            int depth = 0;
+            while(depth < generateChunkGraphDepth)
+            {
+                int platformNodesCount = platformNodes.Count;
+                for(int i = graphListIndex; i < platformNodesCount; i += 1)
+                {
+                    List<int> platformEdges = roomChunk.GetPlatformEdges(platformNodes[i], jumpHeight);
+                    foreach(int edge in platformEdges)
+                    {
+                        if (!platformNodes.Contains(edge)) platformNodes.Add(edge);
+                    }
+                }
+                graphListIndex = platformNodesCount;
+                depth += 1;
+            }
+            foreach (int edge in platformNodes)
             {
                 PlatformChunk platform = roomChunk.GetPlatform(edge);
                 if (!graphList.Contains(platform))
                 {
                     roomChunk.GetPlatformEdges(edge, jumpHeight);
                     graphList.Add(platform);
+                    
                 }
 
             }

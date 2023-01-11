@@ -643,7 +643,7 @@ MonoBehaviour:
   height: 9
   noiseScale: 8
   octaves: 4
-  persistance: 1
+  persistance: 0
   lacunarity: 0.25
   seed: 0
   offset: {x: 0, y: 0}
@@ -653,7 +653,7 @@ MonoBehaviour:
   _chunkRadius: {x: 1, y: 1}
   _tileRulesRadius: {x: 1, y: 1}
   _tileRulesFixRadius: {x: 1, y: 1}
-  tileRadius: {x: 4, y: 3}
+  tileRadius: {x: 12, y: 9}
   visibleChunkIDs: []
   toFixChunkIDs: []
   toDisplayChunks: []
@@ -667,6 +667,7 @@ MonoBehaviour:
   displayPlatformGraph: 0
   playerPrefab: {fileID: 7960479654452475114, guid: 496b3b00cd6ff2f4491c95874b5cd98e, type: 3}
   clickFuction: 4
+  generateChunkGraphDepth: 0
   fixTileRuleBorder: 3
 --- !u!1 &1747112939
 GameObject:

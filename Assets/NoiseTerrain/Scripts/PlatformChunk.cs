@@ -17,8 +17,12 @@ namespace NoiseTerrain
         public void SetPath(int platformID, RoomChunk roomChunk, int jumpHeight)
         {
             this.platformID = platformID;
-            roomChunk.PrintPath(new Vector2Int(groundTiles[0].x + roomChunk.minTile.x, -groundTiles[0].y + 1 - roomChunk.maxTile.y), jumpHeight, platformID);
-            path = roomChunk.GetPath(new Vector2Int(groundTiles[0].x + roomChunk.minTile.x, -groundTiles[0].y + 1 - roomChunk.maxTile.y), jumpHeight, platformID);
+            Vector2Int start = GetTilePos(groundTiles[0], roomChunk);
+            //roomChunk.PrintPath(new Vector2Int(groundTiles[0].x + roomChunk.minTile.x, -groundTiles[0].y + 1 - roomChunk.maxTile.y), jumpHeight, platformID);
+            //path = roomChunk.GetPath(new Vector2Int(groundTiles[0].x + roomChunk.minTile.x, -groundTiles[0].y + 1 - roomChunk.maxTile.y), jumpHeight, platformID);
+            
+            //roomChunk.PrintPath(start, jumpHeight, platformID);
+            path = roomChunk.GetPath(start, jumpHeight, platformID);
             SetPlatformEdges(platformID, roomChunk);
         }
         public void SetPlatformEdges(int platformID, RoomChunk roomChunk)
