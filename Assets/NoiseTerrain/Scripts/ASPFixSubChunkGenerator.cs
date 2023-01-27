@@ -6,7 +6,7 @@ public class ASPFixSubChunkGenerator : ASPGenerator
 {
     public int width, height, fixTileRuleBorder;
     public NoiseTerrain.TileRules tileRules;
-    public NoiseTerrain.SubChunk subChunk;
+    public TerrainChunk.SubChunk subChunk;
     public bool starting, running;
 
     private void Update()

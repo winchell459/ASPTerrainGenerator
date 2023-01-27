@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 
+
 public class ASPFixSubChunk : FixSubChunk
 {
     //public Clingo2.ClingoSolver solver;
@@ -11,7 +12,7 @@ public class ASPFixSubChunk : FixSubChunk
     {
         return CheckSolverStatus();
     }
-    public override void Fix(NoiseTerrain.SubChunk subChunk, int fixTileRuleBorder, NoiseTerrain.TileRules tileRules)
+    public override void Fix(TerrainChunk.SubChunk subChunk, int fixTileRuleBorder, NoiseTerrain.TileRules tileRules)
     {
         int width = subChunk.tiles.GetLength(0);
         int height = subChunk.tiles.GetLength(1);

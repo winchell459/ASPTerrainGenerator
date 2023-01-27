@@ -289,7 +289,7 @@ Camera:
   far clip plane: 1000
   field of view: 60
   orthographic: 1
-  orthographic size: 32
+  orthographic size: 95
   m_Depth: -1
   m_CullingMask:
     serializedVersion: 2
@@ -387,6 +387,51 @@ MonoBehaviour:
   tileRules: {fileID: 11400000, guid: 6d490fca4911858419df1f0338be359f, type: 2}
   starting: 0
   running: 0
+--- !u!1 &1053957619
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1053957621}
+  - component: {fileID: 1053957620}
+  m_Layer: 0
+  m_Name: ChunkMap
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1053957620
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1053957619}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ed68e3d7912511849adc5a4f06671175, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  width: 12
+  height: 9
+--- !u!4 &1053957621
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1053957619}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 6
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1398139178
 GameObject:
   m_ObjectHideFlags: 0
@@ -641,10 +686,10 @@ MonoBehaviour:
   fullTilemap: {fileID: 1398139181}
   width: 12
   height: 9
-  noiseScale: 12
+  noiseScale: 9
   octaves: 4
-  persistance: 1
-  lacunarity: 0.52
+  persistance: 0.422
+  lacunarity: 0.25
   seed: 0
   offset: {x: 0, y: 0}
   autoUpdate: 0
@@ -653,20 +698,21 @@ MonoBehaviour:
   _chunkRadius: {x: 1, y: 1}
   _tileRulesRadius: {x: 1, y: 1}
   _tileRulesFixRadius: {x: 1, y: 1}
-  tileRadius: {x: 8, y: 15}
+  tileRadius: {x: 10, y: 10}
   visibleChunkIDs: []
   toFixChunkIDs: []
   toDisplayChunks: []
   target: {fileID: 1486576023}
-  jumpHeight: 3
+  jumpHeight: 6
   tileRules: {fileID: 11400000, guid: 6d490fca4911858419df1f0338be359f, type: 2}
-  fixTileRules: 1
+  chunkMap: {fileID: 1053957620}
+  fixTileRules: 0
   exitFixTileRules: 0
   fixSubChunk: {fileID: 797004055}
   debugVisibleChunkClearOverride: 1
   displayPlatformGraph: 0
   playerPrefab: {fileID: 7960479654452475114, guid: 496b3b00cd6ff2f4491c95874b5cd98e, type: 3}
-  clickFuction: 4
+  clickFunction: 4
   generateChunkGraphDepth: 0
   fixTileRuleBorder: 3
 --- !u!1 &1747112939

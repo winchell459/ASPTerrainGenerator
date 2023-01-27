@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace NoiseTerrain
+namespace TerrainChunk
 {
     public class RoomChunk
     {
@@ -103,7 +103,7 @@ namespace NoiseTerrain
                     if (filledChunkIDs[x, y] != 0)
                     {
                         filledChunks[filledChunkIDs[x, y] - 1].filledTiles.Add(new Vector2Int(x, y));
-                        if(!GetTile(x,y-1)) filledChunks[filledChunkIDs[x, y] - 1].groundTiles.Add(new Vector2Int(x, y));
+                        if(y > 0 && !GetTile(x,y-1)) filledChunks[filledChunkIDs[x, y] - 1].groundTiles.Add(new Vector2Int(x, y));
                     }
                 }
             }

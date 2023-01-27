@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Tilemaps;
 using System.Threading;
+using TerrainChunk;
 
 namespace NoiseTerrain
 {
@@ -27,7 +28,8 @@ namespace NoiseTerrain
         
         public TileRules tileRules;
 
-        List<Chunk> chunks = new List<Chunk>();
+        
+        public ChunkMap chunkMap;
         //public bool debugFixTileRules;
         public bool fixTileRules;
         public bool exitFixTileRules = false;
@@ -53,7 +55,7 @@ namespace NoiseTerrain
         private void Update()
         {
             HandleMouseClick();
-            Vector2Int chunkID = GetChunkID(target.position);
+            Vector2Int chunkID = chunkMap.GetChunkID(target.position);
 
             if (displayPlatformGraph)
             {
@@ -71,7 +73,7 @@ namespace NoiseTerrain
 
             for (int i = 0; i < visibleChunkIDs.Count; i += 1)
             {
-                Chunk visibleChunk = GetChunk(visibleChunkIDs[i]);
+                Chunk visibleChunk = chunkMap.GetChunk(visibleChunkIDs[i]);
                 if (visibleChunk.valueChanged)
                 {
                     if (!toDisplayChunks.Contains(visibleChunkIDs[i]))
@@ -101,22 +103,7 @@ namespace NoiseTerrain
             DisplayMap(chunkID);
         }
 
-        public Chunk GetChunk(Vector2Int chunkID)
-        {
-            foreach (Chunk chunk in chunks)
-            {
-                if (chunk.chunkID == chunkID) return chunk;
-            }
-            return null;
-        }
-
-        public Vector2Int GetChunkID(Vector2 pos)
-        {
-            int xOffset = pos.x < 0 ? -1 : 0;
-            int yOffset = pos.y > 0 ? 1 : 0;
-
-            return new Vector2Int(xOffset + (int)pos.x / width, -yOffset - (int)pos.y / height);
-        }
+        
 
         public void DisplayMap(Vector2Int chunkID)
         {
@@ -202,7 +189,7 @@ namespace NoiseTerrain
                     //build chunks
                     for (int i = 0; i < toBuildChunks.Count; i += 1)
                     {
-                        Chunk chunk = GetChunk(toBuildChunks[i]);
+                        Chunk chunk = chunkMap.GetChunk(toBuildChunks[i]);
                         if (chunk == null)
                         {
                             int minX = toBuildChunks[i].x * width;
@@ -210,15 +197,15 @@ namespace NoiseTerrain
                             int minY = toBuildChunks[i].y * height;
                             int maxY = (toBuildChunks[i].y + 1) * height - 1;
 
-                            chunk = new Chunk(toBuildChunks[i], GenerateBoolMap(minX, maxX, minY, maxY), this);
-                            chunks.Add(chunk);
+                            chunk = new Chunk(toBuildChunks[i], GenerateBoolMap(minX, maxX, minY, maxY), chunkMap);
+                            chunkMap.AddChunk(chunk);
                         }
                     }
 
                     //check tileRules
                     for (int i = 0; i < toCheckTileRulesChunks.Count; i += 1)
                     {
-                        Chunk chunk = GetChunk(toCheckTileRulesChunks[i]);
+                        Chunk chunk = chunkMap.GetChunk(toCheckTileRulesChunks[i]);
                         Utility.CheckTileRules(chunk,tileRules);
                         // Debug.Log($"Checking Chunk {chunk.chunkID}");
                     }
@@ -228,7 +215,7 @@ namespace NoiseTerrain
                     {
                         if (!toFixChunkIDs.Contains(toFixTileRulesChunks[i]) /*&& !visibleChunkIDs.Contains(toFixTileRulesChunks[i]) && !this.toDisplayChunks.Contains(toFixTileRulesChunks[i])*/)
                         {
-                            Chunk chunk = GetChunk(toFixTileRulesChunks[i]);
+                            Chunk chunk = chunkMap.GetChunk(toFixTileRulesChunks[i]);
                             Utility.CheckTileRules(chunk,tileRules); // need to check in case invalid were fixed in an overlapping subchunk
                             if (chunk.hasInvalidTile)
                             {
@@ -269,7 +256,7 @@ namespace NoiseTerrain
         }
         public void GenerateMap(Vector2Int chunkID)
         {
-            Chunk chunk = GetChunk(chunkID);
+            Chunk chunk = chunkMap.GetChunk(chunkID);
             int minX = chunkID.x * width;
             int maxX = (chunkID.x + 1) * width - 1;
             int minY = chunkID.y * height;
@@ -307,7 +294,7 @@ namespace NoiseTerrain
             int minY = chunkID.y * height;
             int maxY = (chunkID.y + 1) * height - 1;
             ClearMap(minX, maxX, minY, maxY);
-            GetChunk(chunkID).ClearChunk();
+            chunkMap.GetChunk(chunkID).ClearChunk();
         }
 
         public override void ClearMap()
@@ -330,12 +317,13 @@ namespace NoiseTerrain
         }
 
         Vector2Int lastClickChunkID;
+        Vector2Int lastClickID;
         public GameObject playerPrefab;
-        public enum HandleMouseClickFuction {resetChunk,placePlayer,selectPlatform,generatePath,generatePlatformGraph}
-        public HandleMouseClickFuction clickFuction;
+        public enum HandleMouseClickFunction {resetChunk,placePlayer,selectPlatform,generatePath,generatePlatformGraph, toggleTile }
+        public HandleMouseClickFunction clickFunction;
         private void HandleMouseClick()
         {
-            if (clickFuction == HandleMouseClickFuction.generatePath)
+            if (clickFunction == HandleMouseClickFunction.generatePath)
             {
                 if (roomChunk != null && Input.GetMouseButtonUp(0))
                 {
@@ -352,7 +340,24 @@ namespace NoiseTerrain
 
                 }
             }
-            else if (clickFuction == HandleMouseClickFuction.placePlayer)
+            else if (clickFunction == HandleMouseClickFunction.toggleTile)
+            {
+                Vector2Int clickTile = new Vector2Int((int)Mathf.Floor(Camera.main.ScreenToWorldPoint(Input.mousePosition).x), (int)Mathf.Floor(Camera.main.ScreenToWorldPoint(Input.mousePosition).y));
+                if (Input.GetMouseButton(0) && (lastClickID == null || lastClickID != clickTile))
+                {
+                    Debug.Log($"TileClicked {clickTile}");
+                    Chunk clickedChunk = chunkMap.GetChunk(chunkMap.GetChunkID(Camera.main.ScreenToWorldPoint(Input.mousePosition)));
+                    if (clickedChunk != null)
+                    {
+                        bool value = chunkMap.GetTile(clickTile);
+                        chunkMap.SetTile(clickTile, !value);
+
+                    }
+                    lastClickID = clickTile;
+                }
+
+            }
+            else if (clickFunction == HandleMouseClickFunction.placePlayer)
             {
                 if (roomChunk != null && Input.GetMouseButtonUp(0))
                 {
@@ -365,12 +370,12 @@ namespace NoiseTerrain
                     }
                     
                 }
-            }else if(clickFuction == HandleMouseClickFuction.resetChunk)
+            }else if(clickFunction == HandleMouseClickFunction.resetChunk)
             {
-                Vector2Int clickChunkID = GetChunkID(Camera.main.ScreenToWorldPoint(Input.mousePosition));
+                Vector2Int clickChunkID = chunkMap.GetChunkID(Camera.main.ScreenToWorldPoint(Input.mousePosition));
                 if (Input.GetMouseButton(0) && (lastClickChunkID == null || lastClickChunkID != clickChunkID))
                 {
-                    Chunk clickedChunk = GetChunk(clickChunkID);
+                    Chunk clickedChunk = chunkMap.GetChunk(clickChunkID);
                     if (clickedChunk != null)
                     {
                         Debug.Log($"resetting {clickChunkID} chunk");
@@ -382,7 +387,7 @@ namespace NoiseTerrain
                     }
                     lastClickChunkID = clickChunkID;
                 }
-            }else if (clickFuction == HandleMouseClickFuction.selectPlatform)
+            }else if (clickFunction == HandleMouseClickFunction.selectPlatform)
             {
                 if (roomChunk != null && Input.GetMouseButtonUp(0))
                 {
@@ -408,7 +413,7 @@ namespace NoiseTerrain
                     
                 }
             }
-            else if (clickFuction == HandleMouseClickFuction.generatePlatformGraph)
+            else if (clickFunction == HandleMouseClickFunction.generatePlatformGraph)
             {
                 if (roomChunk != null && Input.GetMouseButtonUp(0))
                 {
@@ -431,7 +436,7 @@ namespace NoiseTerrain
             List<Chunk> visibleChunks = new List<Chunk>();
             foreach (Vector2Int visibleChunkID in visibleChunkIDs)
             {
-                visibleChunks.Add(GetChunk(visibleChunkID));
+                visibleChunks.Add(chunkMap.GetChunk(visibleChunkID));
             }
             roomChunk = new RoomChunk(visibleChunks, jumpHeight);
         }
@@ -503,7 +508,7 @@ namespace NoiseTerrain
                     }
                     if (chunkIDFound)
                     {
-                        Chunk chunk = GetChunk(chunkID);
+                        Chunk chunk = chunkMap.GetChunk(chunkID);
                         if (chunk != null)
                         {
                             lock (chunk)
