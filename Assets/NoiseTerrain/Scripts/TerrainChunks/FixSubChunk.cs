@@ -29,7 +29,7 @@ public class FixSubChunk : MonoBehaviour
                 index += 1;
             }
         }
-        subChunk.hasInvalid = !Utility.CheckTileRules(subChunk, tileRules);
+        subChunk.hasInvalid = !NoiseTerrain.Utility.CheckTileRules(subChunk, tileRules);
         Fix(0, indices, tilesList, width, subChunk, tileRules);
     }
 
@@ -38,7 +38,7 @@ public class FixSubChunk : MonoBehaviour
             if (!fixTileRules) return;
             if (subChunk.hasInvalid)
             {
-                subChunk.hasInvalid = !Utility.CheckTileRules(tiles, width, tileRules);
+                subChunk.hasInvalid = !NoiseTerrain.Utility.CheckTileRules(tiles, width, tileRules);
 
                 if (!subChunk.hasInvalid)
                 {

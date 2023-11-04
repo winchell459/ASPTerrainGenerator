@@ -57,7 +57,7 @@ namespace NoiseTerrain
             HandleMouseClick();
             Vector2Int chunkID = chunkMap.GetChunkID(target.position);
 
-            if (displayPlatformGraph)
+            if (roomChunk != null && displayPlatformGraph)
             {
                 foreach(PlatformChunk platform in platformGraph)
                 {
@@ -331,10 +331,11 @@ namespace NoiseTerrain
                     Vector2Int clickTile = new Vector2Int((int)Mathf.Floor(Camera.main.ScreenToWorldPoint(Input.mousePosition).x), (int)Mathf.Floor(Camera.main.ScreenToWorldPoint(Input.mousePosition).y));
                     if (roomChunk.GetPlatformID(clickTile) == 0)
                     {
+                        Debug.Log("Finding path");
                         roomChunk.PrintPath(clickTile, jumpHeight, roomChunk.GetPlatformID(clickTile));
                     }else if(roomChunk.GetPlatformID(clickTile)%256 > 0)
                     {
-                        Debug.Log("Finding platform path");
+                        Debug.Log("Finding platform connection path");
                         roomChunk.PrintPath(new Vector2Int(clickTile.x, clickTile.y + 1), jumpHeight, roomChunk.GetPlatformID(clickTile));
                     }
 
@@ -442,7 +443,7 @@ namespace NoiseTerrain
         }
         public void ClearRoomChunk()
         {
-
+            displayPlatformGraph = false;
         }
         private int startingPlatformID;
         public int generateChunkGraphDepth = 0;
@@ -450,7 +451,7 @@ namespace NoiseTerrain
         {
             List<int> platformNodes = new List<int>();//roomChunk.GetPlatformEdges(startingPlatformID, jumpHeight);
             platformNodes.Add(startingPlatformID);
-            List<PlatformChunk> graphList = new List<PlatformChunk>();
+            
             //graphList.Add(roomChunk.GetPlatform(startingPlatformID));
             int graphListIndex = 0;
             int depth = 0;
@@ -468,6 +469,9 @@ namespace NoiseTerrain
                 graphListIndex = platformNodesCount;
                 depth += 1;
             }
+
+            //----------- update  platformGraph : List<PlatformChunk> ------------
+            List<PlatformChunk> graphList = new List<PlatformChunk>();
             foreach (int edge in platformNodes)
             {
                 PlatformChunk platform = roomChunk.GetPlatform(edge);

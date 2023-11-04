@@ -245,7 +245,7 @@ namespace TerrainChunk
                 }
                 pathMap += "\n";
             }
-            Debug.Log(pathMap);
+            //Debug.Log(pathMap);
             Clingo_02.ClingoUtil.CreateFile(pathMap, "debugPath.txt");
         }
         public PlatformChunk GetPlatform(int platformID)
@@ -266,7 +266,7 @@ namespace TerrainChunk
 
         public int[,] GetPath(Vector2Int start, int jumpHeight, int platformID)
         {
-            int exitLoop = 1000;
+            int exitLoop = 100000;
             int[,] path = new int[width, height];
             for(int i = 0; i < width; i += 1)
             {
@@ -292,7 +292,9 @@ namespace TerrainChunk
                 //Debug.Log($"visiting {current}");
                 path[x, y] = Mathf.Max(0, path[x, y]);
 
-                //jumping
+                //--------- jumping ------------- 
+                //if platformID != 0 exit pathfinding when landing on another platform
+                //cannot jump on another platform
                 if (y < height - 1 && y > 0 && GetTile(x, y + 1) && !GetTile(x, y - 1) && (platformID == 0 || platformID == GetPlatformID(x,y+1)))
                 {
                     AddMaxToPath(frontier, path, jumpHeight - 1, x, y - 1);
