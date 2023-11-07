@@ -82,6 +82,20 @@ namespace Sebastian
             }
         }
 
+
+        public void GenerateMap(DrawMode drawMode, int width, int height, float scale, int octaves, float persistance, float lacunarity, int seed)
+        {
+            this.drawMode = drawMode;
+            mapWidth = width;
+            mapHeight = height;
+            noiseScale = scale;
+            this.octaves = octaves;
+            this.persistance = persistance;
+            this.lacunarity = lacunarity;
+            this.seed = seed;
+            GenerateMap();
+        }
+
         private void OnValidate()
         {
             if (mapWidth < 1) mapWidth = 1;

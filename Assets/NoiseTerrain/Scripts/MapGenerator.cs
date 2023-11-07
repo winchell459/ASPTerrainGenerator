@@ -100,7 +100,7 @@ namespace NoiseTerrain
 
         public virtual void GenerateMap()
         {
-            //Debug.Log("GenerateMap");
+            Debug.Log("GenerateMap");
             float[,] noiseMap = Sebastian.Noise.GenerateNoiseMap(width, height, seed, noiseScale, octaves, persistance, lacunarity, offset);
 
             for(int y = 0; y < height; y += 1)
