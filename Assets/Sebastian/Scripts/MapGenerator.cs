@@ -6,7 +6,7 @@ namespace Sebastian
 {
     public class MapGenerator : MonoBehaviour
     {
-        public enum DrawMode { NoiseMap, ColorMap, Mesh, FalloffMap}
+        public enum DrawMode { NoiseMap, ColorMap, Mesh, FalloffMap, Tilemap}
         public DrawMode drawMode;
 
         public bool useFlatShading;
@@ -79,6 +79,10 @@ namespace Sebastian
             }else if(drawMode == DrawMode.FalloffMap)
             {
                 display.DrawTexture(TextureGenerator.TextureFromHeightMap(FalloffGenerator.GenerateFalloffMap(mapWidth)));
+            }
+            else if(drawMode == DrawMode.Tilemap)
+            {
+                display.DrawTiles(noiseMap);
             }
         }
 

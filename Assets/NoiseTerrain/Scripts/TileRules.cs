@@ -34,6 +34,35 @@ namespace NoiseTerrain
             return sprite;
         }
 
+        public virtual UnityEngine.Tilemaps.TileBase GetSprite(bool[,] map, int x, int y)
+        {
+            bool[] neighbors = new bool[8];
+            neighbors[0] = HasNeighbor(map, x - 1, y + 1, false);
+            neighbors[1] = HasNeighbor(map, x, y + 1, false);
+            neighbors[2] = HasNeighbor(map, x + 1, y + 1, false);
+            neighbors[3] = HasNeighbor(map, x - 1, y, false);
+            neighbors[4] = HasNeighbor(map, x + 1, y, false);
+            neighbors[5] = HasNeighbor(map, x - 1, y - 1, false);
+            neighbors[6] = HasNeighbor(map, x , y - 1, false);
+            neighbors[7] = HasNeighbor(map, x + 1, y - 1, false);
+
+            return GetSprite(neighbors);
+        }
+
+        public bool HasNeighbor(bool[,] map, int x, int y, bool fullOutOfRange)
+        {
+            int width = map.GetLength(0);
+            int height = map.GetLength(1);
+            if(x < 0 || x >= width || y < 0 || y >= height)
+            {
+                return fullOutOfRange;
+            }
+            else
+            {
+                return map[x, y];
+            }
+        }
+
         public virtual bool GetValidTile(bool[] neighbors)
         {
             bool isValid = false;
